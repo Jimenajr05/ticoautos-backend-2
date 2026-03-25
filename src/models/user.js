@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 
 // Define el esquema del usuario
 const userSchema = new mongoose.Schema({
+    cedula: {
+        type: String, 
+        requiere: true,
+        unique: true,
+        trim: true
+    },
     name: {
         type: String,
         required: true,
@@ -11,11 +17,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
-    },
-    age: {
-        type: Number,
-        required: true,
-        min: 18
     },
     phone: {
         type: String,
@@ -37,6 +38,15 @@ const userSchema = new mongoose.Schema({
     profileImage: {
         type: String,
         default: null
+    },
+    isVerified:{
+        type: Boolean,
+        default: null
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'active'],
+        default: 'pending'
     }
 }, {
     timestamps: true
