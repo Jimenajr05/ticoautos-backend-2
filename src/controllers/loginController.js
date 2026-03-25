@@ -24,6 +24,12 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        if (user.status !== 'active' || !user.isVerified){
+            return res.status(403).json({
+                message: 'Debes verificar tu cuenta antes de iniciar sesión'
+            });
+        }
+
         // Compara la contraseña enviada con la guardada
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
@@ -43,9 +49,9 @@ const login = async (req, res) => {
           token,
           user: {
             id: user._id,
+            cedula: user.cedula,
             name: user.name,
             lastName: user.lastName,
-            age: user.age,
             phone: user.phone,
             email: user.email,
             profileImage: user.profileImage
