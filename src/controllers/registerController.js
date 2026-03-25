@@ -1,85 +1,84 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const { getPadronDataByCedula } = require('../services/padronService');
 
-// Controlador para registrar un nuevo usuario
 const register = async (req, res) => {
+    const { cedula, phone, email, password } = req.body;
 
-    // Obtiene los datos enviados desde el body
-    const { name, lastName, age, phone, email, password } = req.body;
-
-    // Valida que todos los campos obligatorios estén presentes
-    if (!name || !lastName || !age || !phone || !email || !password) {
-        return res.status(400).json({ message: 'All fields are required' });
-    }  
-
-    // Verifica que el usuario tenga al menos 18 años
-    if (age < 18) {
-        return res.status(400).json({ message: 'You must be at least 18 years old to register' });
+    if (!cedula || !phone || !email || !password) {
+        return res.status(400).json({ message: 'Cedula, phone, email and password are required' });
     }
 
-    // Verifica que la contraseña tenga al menos 6 caracteres
+    if (!/^\d{9}$/.test(cedula.trim())) {
+        return res.status(400).json({ message: 'Cedula must contain exactly 9 digits' });
+    }
+
     if (password.length < 6) {
         return res.status(400).json({ message: 'Password must be at least 6 characters long' });
     }
 
-    // Verifica que exista la clave secreta para generar el JWT
-    if (!process.env.JWT_SECRET) {
-        return res.status(500).json({ message: 'JWT_SECRET is not configured' });
-    }
-
     try {
-        // Busca si ya existe un usuario con ese email
-        const existingUser = await User.findOne({ email: email.toLowerCase(). trim() });
+        const normalizedEmail = email.toLowerCase().trim();
+        const normalizedCedula = cedula.trim();
 
-        // Si el email ya está registrado
-        if (existingUser) {
+        const existingUserByEmail = await User.findOne({ email: normalizedEmail });
+        if (existingUserByEmail) {
             return res.status(409).json({ message: 'Email already in use' });
-        }   
+        }
 
-        // Encripta la contraseña antes de guardarla
+        const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
+        if (existingUserByCedula) {
+            return res.status(409).json({ message: 'Cedula already registered' });
+        }
+
+        const padronData = await getPadronDataByCedula(normalizedCedula);
+
+        if (!padronData || padronData.message === 'No encontrado') {
+            return res.status(400).json({ message: 'La cédula no existe en el padrón' });
+        }
+
+        const fullLastName = `${padronData.apellidoPaterno} ${padronData.apellidoMaterno}`.trim();
+
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Obtiene la ruta de la imagen de perfil si se subió una
         const profileImage = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null;
 
-        // Crea el nuevo usuario en la base de datos
         const user = await User.create({
-            name: name.trim(),
-            lastName: lastName.trim(),
-            age,
+            cedula: normalizedCedula,
+            name: padronData.nombre.trim(),
+            lastName: fullLastName,
             phone: phone.trim(),
-            email: email.toLowerCase().trim(),
+            email: normalizedEmail,
             password: hashedPassword,
-            profileImage
+            profileImage,
+            isVerified: false,
+            status: 'pending'
         });
 
-        // Genera el token JWT para autenticación
-        const token = jwt.sign(
-            { id: user._id, email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
-        // Respuesta exitosa con token y datos del usuario
-        return res.status(201).json({ 
-            message: 'User registered successfully',
-            token: token,
+        return res.status(201).json({
+            message: 'Usuario registrado correctamente',
             user: {
                 id: user._id,
+                cedula: user.cedula,
                 name: user.name,
                 lastName: user.lastName,
-                age: user.age,
                 phone: user.phone,
                 email: user.email,
-                profileImage: user.profileImage
+                profileImage: user.profileImage,
+                isVerified: user.isVerified,
+                status: user.status
             }
         });
     } catch (error) {
-        // Maneja el error si el email ya existe (error de MongoDB)
         if (error?.code === 11000) {
-            return res.status(409).json({ message: 'Email already in use' });
+            if (error.keyPattern?.email) {
+                return res.status(409).json({ message: 'Email already in use' });
+            }
+
+            if (error.keyPattern?.cedula) {
+                return res.status(409).json({ message: 'Cedula already registered' });
+            }
         }
+
         console.error(error);
         return res.status(500).json({ message: 'Error registering user' });
     }
