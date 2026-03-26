@@ -14,6 +14,7 @@ const upload = require('../middlewares/uploadMiddleware');
 const router = express.Router();
 
 const getPadronInfo = require('../controllers/getPadronInfoController');
+const { googleLoginOrRegister } = require('../controllers/googleAuthController');
 
 // Ruta para registrar un usuario
 router.post('/register',upload.single('profileImage'), register);
@@ -22,6 +23,7 @@ router.post('/register',upload.single('profileImage'), register);
 router.post('/login', login);
 
 router.get('/padron/:cedula', getPadronInfo);
+router.post('/google', googleLoginOrRegister);
 
 // Exporta las rutas para usarlas en el servidor principal
 module.exports = router;
