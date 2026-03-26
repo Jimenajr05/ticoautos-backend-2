@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
     cedula: {
         type: String, 
-        requiere: true,
+        required: true,
         unique: true,
         trim: true
     },
@@ -47,6 +47,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['pending', 'active'],
         default: 'pending'
+    },
+    googleI: {
+        type: String,
+        default: null
+    },
+    authProvider: {
+        type: String,
+        enum: ['local', 'google'],
+        default: 'local'
     }
 }, {
     timestamps: true
