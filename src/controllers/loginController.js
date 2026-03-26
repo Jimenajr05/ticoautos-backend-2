@@ -24,6 +24,12 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        if (user.authProvider === 'google') {
+            return res.status(400).json({
+                message: 'Esta cuenta fue registrada con Google. Debes iniciar sesión con Google.'
+            });
+        }
+
         if (user.status !== 'active' || !user.isVerified){
             return res.status(403).json({
                 message: 'Debes verificar tu cuenta antes de iniciar sesión'
