@@ -5,7 +5,7 @@ const getPadronInfo = async (req, res) => {
 
     if (!/^\d{9}$/.test(cedula.trim())) {
         return res.status(400).json({
-            message: 'La cédula debe tener exactamente 9 dígitos'
+            message: 'Error 400'
         });
     }
 
@@ -14,7 +14,7 @@ const getPadronInfo = async (req, res) => {
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(404).json({
-                message: 'La cédula no existe en el padrón'
+                message: 'Error 404'
             });
         }
 
@@ -28,7 +28,7 @@ const getPadronInfo = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            message: 'Error al consultar el padrón'
+            message: 'Error 500'
         });
     }
 };

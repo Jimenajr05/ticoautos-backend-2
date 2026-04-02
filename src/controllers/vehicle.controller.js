@@ -82,12 +82,12 @@ exports.updateVehicle = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "El vehículo se actualizó correctamente",
+      message: "Estado 200",
       vehicle: updatedVehicle,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al actualizar vehículo",
+      message: "Error 500",
       error: error.message,
     });
   }
@@ -109,7 +109,7 @@ exports.getVehicleById = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json({
         success: false,
-        message: "Vehículo no encontrado",
+        message: "Error 404o",
       });
     }
 
@@ -120,7 +120,7 @@ exports.getVehicleById = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error al obtener el vehículo",
+      message: "Error 500",
       error: error.message,
     });
   }
@@ -138,14 +138,14 @@ exports.deleteVehicle = async (req, res) => {
     // Si no existe
     if (!vehicle) {
       return res.status(404).json({
-        message: "Vehículo no encontrado",
+        message: "Error 404",
       });
     }
 
     // Verifica que el vehículo pertenezca al usuario autenticado
     if (vehicle.user.toString() !== req.user.id) {
       return res.status(403).json({
-        message: "No autorizado",
+        message: "Error 403",
       });
     }
 
@@ -153,11 +153,11 @@ exports.deleteVehicle = async (req, res) => {
     await Vehicle.findByIdAndDelete(id);
 
     res.status(200).json({
-      message: "Se eliminó el vehículo correctamente",
+      message: "Estado 200",
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al eliminar el vehículo",
+      message: "Error 500",
       error: error.message,
     });
   }
@@ -175,14 +175,14 @@ exports.markAsSold = async (req, res) => {
     // Si no existe
     if (!vehicle) {
       return res.status(404).json({
-        message: "Vehículo no encontrado",
+        message: "Error 404",
       });
     }
 
     // Verifica que el vehículo pertenezca al usuario autenticado
     if (vehicle.user.toString() !== req.user.id) {
       return res.status(403).json({
-        message: "No autorizado",
+        message: "Error 403",
       });
     }
 
@@ -193,12 +193,12 @@ exports.markAsSold = async (req, res) => {
     await vehicle.save();
 
     res.status(200).json({
-      message: "Vehículo marcado como vendido",
+      message: "Estado 200",
       vehicle,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al actualizar el vehículo",
+      message: "Error 500",
       error: error.message,
     });
   }
@@ -283,7 +283,7 @@ exports.getVehicles = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al obtener los vehículos",
+      message: "Error 500",
       error: error.message,
     });
   }
@@ -299,12 +299,12 @@ exports.getMyVehicles = async (req, res) => {
 
     // Respuesta exitosa
     res.status(200).json({
-      message: "Vehículos del usuario obtenidos correctamente",
+      message: "Estado 200",
       data: vehicles,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al obtener los vehículos del usuario",
+      message: "Error 500",
       error: error.message,
     });
   }
@@ -323,7 +323,7 @@ exports.getVehicleShareLink = async (req, res) => {
     if (!vehicle) {
       return res.status(404).json({
         success: false,
-        message: "Vehículo no encontrado",
+        message: "Error 404",
       });
     }
 
@@ -333,7 +333,7 @@ exports.getVehicleShareLink = async (req, res) => {
     // Respuesta exitosa
     res.status(200).json({
       success: true,
-      message: "Enlace de vehículo generado correctamente",
+      message: "Estado 200",
       data: {
         vehicleId: vehicle._id,
         shareURL,
@@ -342,7 +342,7 @@ exports.getVehicleShareLink = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error al generar el enlace del vehículo",
+      message: "Error 500",
       error: error.message,
     });
   }

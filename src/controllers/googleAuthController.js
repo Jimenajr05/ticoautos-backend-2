@@ -87,14 +87,14 @@ const googleLoginOrRegister = async (req, res) => {
 
         if (!/^\d{9}$/.test(normalizedCedula)) {
             return res.status(400).json({
-                message: 'La cédula debe tener exactamente 9 dígitos'
+                message: 'Error 400'
             });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
             return res.status(409).json({
-                message: 'La cédula ya está registrada'
+                message: 'Error 409'
             });
         }
 
@@ -102,7 +102,7 @@ const googleLoginOrRegister = async (req, res) => {
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(400).json({
-                message: 'La cédula no existe en el padrón'
+                message: 'Error 400'
             });
         }
 
@@ -144,7 +144,7 @@ const googleLoginOrRegister = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            message: 'Error con la autenticación de Google'
+            message: 'Error 500'
         });
     }
 };

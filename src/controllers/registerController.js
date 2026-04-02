@@ -10,11 +10,11 @@ const register = async (req, res) => {
     }
 
     if (!/^\d{9}$/.test(cedula.trim())) {
-        return res.status(400).json({ message: 'Cedula must contain exactly 9 digits' });
+        return res.status(400).json({ message: 'La cedula debe de tener 9 digitos' });
     }
 
     if (password.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+        return res.status(400).json({ message: 'La contraseña debe tener 6 caracteres' });
     }
 
     try {
@@ -23,18 +23,18 @@ const register = async (req, res) => {
 
         const existingUserByEmail = await User.findOne({ email: normalizedEmail });
         if (existingUserByEmail) {
-            return res.status(409).json({ message: 'Email already in use' });
+            return res.status(409).json({ message: 'Este email ya esta en uso' });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
-            return res.status(409).json({ message: 'Cedula already registered' });
+            return res.status(409).json({ message: 'La cedula ya esta registrada' });
         }
 
         const padronData = await getPadronDataByCedula(normalizedCedula);
 
         if (!padronData || padronData.message === 'No encontrado') {
-            return res.status(400).json({ message: 'La cédula no existe en el padrón' });
+            return res.status(400).json({ message: 'Error 400' });
         }
 
         const fullLastName = `${padronData.apellidoPaterno} ${padronData.apellidoMaterno}`.trim();
@@ -55,7 +55,6 @@ const register = async (req, res) => {
         });
 
         return res.status(201).json({
-            message: 'Usuario registrado correctamente',
             user: {
                 id: user._id,
                 cedula: user.cedula,
@@ -71,16 +70,16 @@ const register = async (req, res) => {
     } catch (error) {
         if (error?.code === 11000) {
             if (error.keyPattern?.email) {
-                return res.status(409).json({ message: 'Email already in use' });
+                return res.status(409).json({ message: 'Este email ya esta en uso' });
             }
 
             if (error.keyPattern?.cedula) {
-                return res.status(409).json({ message: 'Cedula already registered' });
+                return res.status(409).json({ message: 'Cedula ya esta registrada' });
             }
         }
 
         console.error(error);
-        return res.status(500).json({ message: 'Error registering user' });
+        return res.status(500).json({ message: 'Error 500' });
     }
 };
 

@@ -9,19 +9,19 @@ const login = async (req, res) => {
 
     // Verifica que ambos campos existan
     if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
+        return res.status(400).json({ message: 'El email y contraseña son requeridos' });
     }
 
     // Verifica que exista la clave secreta para generar el JWT
     if (!process.env.JWT_SECRET) {
-        return res.status(500).json({ message: 'JWT_SECRET is not configured' });
+        return res.status(500).json({ message: 'Error 500' });
     }
 
     try {
         // Busca el usuario por email e incluye la contraseña
         const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Contraseña o usuario invalido' });
         }
 
         if (user.authProvider === 'google') {
@@ -39,7 +39,7 @@ const login = async (req, res) => {
         // Compara la contraseña enviada con la guardada
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Contraseña o usuario invalido' });
         }
 
         // Genera el token JWT con id y email del usuario
@@ -65,7 +65,7 @@ const login = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Error logging in' });
+        return res.status(500).json({ message: 'Error 500' });
     }
 };
 
