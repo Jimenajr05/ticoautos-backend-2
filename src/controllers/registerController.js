@@ -7,7 +7,7 @@ const register = async (req, res) => {
 
     if (!cedula || !phone || !email || !password) {
         return res.status(400).json({
-            message: 'La cédula, el teléfono, el correo y la contraseña son obligatorios'
+            message: 'Error 400'
         });
     }
 
@@ -17,7 +17,7 @@ const register = async (req, res) => {
 
     if (!/^\d{9}$/.test(normalizedCedula)) {
         return res.status(400).json({
-            message: 'La cédula debe tener exactamente 9 dígitos'
+            message: 'Error 400'
         });
     }
 
@@ -28,13 +28,13 @@ const register = async (req, res) => {
 
     if (!/^\+\d{8,15}$/.test(normalizedPhone)) {
         return res.status(400).json({
-            message: 'El número de teléfono debe estar en formato internacional, por ejemplo: +506'
+            message: 'Error 400'
         });
     }
 
     if (password.length < 6) {
         return res.status(400).json({
-            message: 'La contraseña debe tener al menos 6 caracteres'
+            message: 'Error 400'
         });
     }
 
@@ -42,14 +42,14 @@ const register = async (req, res) => {
         const existingUserByEmail = await User.findOne({ email: normalizedEmail });
         if (existingUserByEmail) {
             return res.status(409).json({
-                message: 'Este correo ya está en uso'
+                message: 'Estado 409'
             });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
             return res.status(409).json({
-                message: 'La cédula ya está registrada'
+                message: 'Error 409'
             });
         }
 
@@ -97,13 +97,13 @@ const register = async (req, res) => {
         if (error?.code === 11000) {
             if (error.keyPattern?.email) {
                 return res.status(409).json({
-                    message: 'Este correo ya está en uso'
+                    message: 'Error 409'
                 });
             }
 
             if (error.keyPattern?.cedula) {
                 return res.status(409).json({
-                    message: 'La cédula ya está registrada'
+                    message: 'Error 409'
                 });
             }
         }
