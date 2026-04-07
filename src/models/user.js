@@ -19,7 +19,9 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true,
+        required: function () {
+            return this.authProvider === 'local';
+        },
         trim: true
     },
     email: {
@@ -42,14 +44,14 @@ const userSchema = new mongoose.Schema({
     },
     isVerified: {
         type: Boolean,
-        default: null
+        default: false
     },
     status: {
         type: String,
         enum: ['pending', 'active'],
         default: 'pending'
     },
-    googleI: {
+    googleId: {
         type: String,
         default: null
     },
@@ -59,7 +61,7 @@ const userSchema = new mongoose.Schema({
         default: 'local'
     },
 
-    //twoFactorCode guerda el codigo SMS 
+    //Guarda el codigo SMS 
     twoFactorCode: {
         type: String,
         default: null
@@ -71,13 +73,13 @@ const userSchema = new mongoose.Schema({
         default: null
     },
 
-    //Verifica si a pasó la verificación 2FA en ese intento.
+    //Verifica si pasó la verificación 2FA en ese intento.
     twoFactorVerified: {
         type: Boolean,
         default: false
     },
 
-    //Contar intentos fallidos
+    //Contador de  intentos fallidos
     twoFactorAttempts: {
         type: Number,
         default: 0

@@ -47,7 +47,7 @@ const login = async (req, res) => {
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
             return res.status(401).json({
-                message: 'Correo o contraseña inválidos'
+                message: 'Error 401'
             });
         }
 
@@ -65,6 +65,8 @@ const login = async (req, res) => {
         // Guarda el código temporalmente en el usuario
         user.twoFactorCode = codigo;
         user.twoFactorExpires = expiracion;
+        user.twoFactorVerified = false;
+        user.twoFactorAttempts = 0;
 
         await user.save();
 
@@ -75,7 +77,8 @@ const login = async (req, res) => {
         return res.status(200).json({
             message: 'Estado 200',
             requires2FA: true,
-            userId: user._id
+            userId: user._id,
+            expiresAt: expiracion
         });
 
     } catch (error) {

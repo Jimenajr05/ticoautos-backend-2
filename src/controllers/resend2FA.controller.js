@@ -1,4 +1,3 @@
-
 const User = require('../models/user');
 const { enviarCodigoSMS } = require('../services/sendSmsService');
 
@@ -20,11 +19,17 @@ const reenviarCodigo2FA = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({
-                message: 'Error 400'
+                message: 'Error 404'
             });
         }
 
         if (!user.phone) {
+            return res.status(400).json({
+                message: 'Error 400'
+            });
+        }
+
+        if (user.authProvider === 'google') {
             return res.status(400).json({
                 message: 'Error 400'
             });
@@ -35,13 +40,15 @@ const reenviarCodigo2FA = async (req, res) => {
 
         user.twoFactorCode = codigo;
         user.twoFactorExpires = expiracion;
+        user.twoFactorVerified = false;
 
         await user.save();
 
         await enviarCodigoSMS(user.phone, codigo);
 
         return res.status(200).json({
-            message: 'Estado 200'
+            message: 'Estado 200',
+            expiraEn: expiracion
         });
 
     } catch (error) {
