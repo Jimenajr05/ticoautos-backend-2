@@ -21,7 +21,6 @@ const register = async (req, res) => {
         });
     }
 
-    // Si el usuario escribe solo 8 dígitos, se le agrega +506 automáticamente
     if (/^\d{8}$/.test(normalizedPhone)) {
         normalizedPhone = `+506${normalizedPhone}`;
     }
@@ -57,7 +56,7 @@ const register = async (req, res) => {
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(400).json({
-                message: 'Error 400'
+                message: 'Debe ser mayor de edad para registrarse (cédula no encontrada en padrón)'
             });
         }
 
@@ -73,8 +72,8 @@ const register = async (req, res) => {
             email: normalizedEmail,
             password: hashedPassword,
             profileImage,
-            isVerified: false,
-            status: 'pending',
+            isVerified: true,
+            status: 'active',
             authProvider: 'local'
         });
 
