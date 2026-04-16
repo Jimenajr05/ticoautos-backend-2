@@ -3,32 +3,38 @@ const { getPadronDataByCedula } = require('../services/padronService');
 const getPadronInfo = async (req, res) => {
     const { cedula } = req.params;
 
-    if (!/^\d{9}$/.test(cedula.trim())) {
+    if (!cedula || !/^\d{9}$/.test(cedula.trim())) {
         return res.status(400).json({
-            message: 'La cédula debe tener exactamente 9 dígitos'
+            message: 'Error 400'
         });
     }
 
     try {
         const padronData = await getPadronDataByCedula(cedula.trim());
 
+        console.log('PADRON DATA:', padronData);
+
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(404).json({
-                message: 'La cédula no existe en el padrón'
+                message: cedula
             });
         }
 
-        const fullLastName = `${padronData.apellidoPaterno} ${padronData.apellidoMaterno}`.trim();
+        const name = padronData.nombre?.trim() || '';
+        const apellidoPaterno = padronData.apellidoPaterno?.trim() || '';
+        const apellidoMaterno = padronData.apellidoMaterno?.trim() || '';
+
+        const lastName = `${apellidoPaterno} ${apellidoMaterno}`.trim();
 
         return res.status(200).json({
-            cedula: padronData.cedula,
-            name: padronData.nombre,
-            lastName: fullLastName
+            name,
+            lastName
         });
+
     } catch (error) {
-        console.error(error);
+        console.error('Error en getPadronInfoController:', error);
         return res.status(500).json({
-            message: 'Error al consultar el padrón'
+            message: 'Error interno del servidor'
         });
     }
 };

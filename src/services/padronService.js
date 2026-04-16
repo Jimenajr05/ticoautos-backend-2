@@ -1,10 +1,15 @@
 const axios = require('axios');
 
+const PADRON_API_URL = 'http://localhost:8000';
+
 const getPadronDataByCedula = async (cedula) => {
-    const response = await axios.get(`http://localhost:8000/cedula/${cedula}`);
-    return response.data;
+    try {
+        const response = await axios.get(`${PADRON_API_URL}/cedula/${cedula}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error en padronService:', error.response?.data || error.message);
+        return null;
+    }
 };
 
-module.exports = {
-    getPadronDataByCedula
-};
+module.exports = { getPadronDataByCedula };

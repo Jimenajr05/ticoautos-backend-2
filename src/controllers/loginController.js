@@ -1,71 +1,91 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const { enviarCodigoSMS } = require('../services/sendSmsService');
+
+const generarCodigo2FA = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 // Función que maneja el login del usuario
 const login = async (req, res) => {
-    // Obtiene email y password del body de la petición
     const { email, password } = req.body;
 
     // Verifica que ambos campos existan
     if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
-    }
-
-    // Verifica que exista la clave secreta para generar el JWT
-    if (!process.env.JWT_SECRET) {
-        return res.status(500).json({ message: 'JWT_SECRET is not configured' });
+        return res.status(400).json({
+            message: 'Error 400'
+        });
     }
 
     try {
-        // Busca el usuario por email e incluye la contraseña
-        const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
-        }
+        const normalizedEmail = email.toLowerCase().trim();
 
-        if (user.authProvider === 'google') {
-            return res.status(400).json({
-                message: 'Esta cuenta fue registrada con Google. Debes iniciar sesión con Google.'
+        // Busca el usuario por email e incluye la contraseña
+        const user = await User.findOne({ email: normalizedEmail }).select('+password');
+
+        if (!user) {
+            return res.status(401).json({
+                message: 'Error 401'
             });
         }
 
-        if (user.status !== 'active' || !user.isVerified){
+        // Verifica si la cuenta fue creada con Google
+        if (user.authProvider === 'google') {
+            return res.status(400).json({
+                message: 'Error 400'
+            });
+        }
+
+        // Verifica si la cuenta está activa y verificada
+        if (user.status !== 'active' || !user.isVerified) {
             return res.status(403).json({
-                message: 'Debes verificar tu cuenta antes de iniciar sesión'
+                message: 'Error 403'
             });
         }
 
         // Compara la contraseña enviada con la guardada
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({
+                message: 'Error 401'
+            });
         }
 
-        // Genera el token JWT con id y email del usuario
-        const token = jwt.sign(
-          { id: user._id, email: user.email }, 
-          process.env.JWT_SECRET, 
-          { expiresIn: '1h' }
-        );
+        // Verifica que tenga teléfono registrado
+        if (!user.phone) {
+            return res.status(400).json({
+                message: 'Error 400'
+            });
+        }
 
-        // Respuesta exitosa con token y datos del usuario
-        return res.status(200).json({ 
-          message: 'Login successful', 
-          token,
-          user: {
-            id: user._id,
-            cedula: user.cedula,
-            name: user.name,
-            lastName: user.lastName,
-            phone: user.phone,
-            email: user.email,
-            profileImage: user.profileImage
-          }
+        // Genera el código 2FA y su expiración
+        const codigo = generarCodigo2FA();
+        const expiracion = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
+
+        // Guarda el código temporalmente en el usuario
+        user.twoFactorCode = codigo;
+        user.twoFactorExpires = expiracion;
+        user.twoFactorVerified = false;
+        user.twoFactorAttempts = 0;
+
+        await user.save();
+
+        // Envía el código por SMS
+        await enviarCodigoSMS(user.phone, codigo);
+
+        // Responde indicando que falta verificar el código
+        return res.status(200).json({
+            message: 'Estado 200',
+            requires2FA: true,
+            userId: user._id,
+            expiresAt: expiracion
         });
+
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error logging in' });
+        console.error('Error en login:', error);
+        return res.status(500).json({
+            message: 'Error 500'
+        });
     }
 };
 

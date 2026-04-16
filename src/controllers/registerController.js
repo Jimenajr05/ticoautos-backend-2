@@ -6,39 +6,62 @@ const register = async (req, res) => {
     const { cedula, phone, email, password } = req.body;
 
     if (!cedula || !phone || !email || !password) {
-        return res.status(400).json({ message: 'Cedula, phone, email and password are required' });
+        return res.status(400).json({
+            message: 'Error 400'
+        });
     }
 
-    if (!/^\d{9}$/.test(cedula.trim())) {
-        return res.status(400).json({ message: 'Cedula must contain exactly 9 digits' });
+    const normalizedCedula = cedula.trim();
+    let normalizedPhone = phone.trim();
+    const normalizedEmail = email.toLowerCase().trim();
+
+    if (!/^\d{9}$/.test(normalizedCedula)) {
+        return res.status(400).json({
+            message: 'Error 400'
+        });
+    }
+
+    // Si el usuario escribe solo 8 dígitos, se le agrega +506 automáticamente
+    if (/^\d{8}$/.test(normalizedPhone)) {
+        normalizedPhone = `+506${normalizedPhone}`;
+    }
+
+    if (!/^\+\d{8,15}$/.test(normalizedPhone)) {
+        return res.status(400).json({
+            message: 'Error 400'
+        });
     }
 
     if (password.length < 6) {
-        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+        return res.status(400).json({
+            message: 'Error 400'
+        });
     }
 
     try {
-        const normalizedEmail = email.toLowerCase().trim();
-        const normalizedCedula = cedula.trim();
-
         const existingUserByEmail = await User.findOne({ email: normalizedEmail });
         if (existingUserByEmail) {
-            return res.status(409).json({ message: 'Email already in use' });
+            return res.status(409).json({
+                message: 'Estado 409'
+            });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
-            return res.status(409).json({ message: 'Cedula already registered' });
+            return res.status(409).json({
+                message: 'Error 409'
+            });
         }
 
         const padronData = await getPadronDataByCedula(normalizedCedula);
 
         if (!padronData || padronData.message === 'No encontrado') {
-            return res.status(400).json({ message: 'La cédula no existe en el padrón' });
+            return res.status(400).json({
+                message: 'Error 400'
+            });
         }
 
         const fullLastName = `${padronData.apellidoPaterno} ${padronData.apellidoMaterno}`.trim();
-
         const hashedPassword = await bcrypt.hash(password, 10);
         const profileImage = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null;
 
@@ -46,16 +69,17 @@ const register = async (req, res) => {
             cedula: normalizedCedula,
             name: padronData.nombre.trim(),
             lastName: fullLastName,
-            phone: phone.trim(),
+            phone: normalizedPhone,
             email: normalizedEmail,
             password: hashedPassword,
             profileImage,
             isVerified: false,
-            status: 'pending'
+            status: 'pending',
+            authProvider: 'local'
         });
 
         return res.status(201).json({
-            message: 'Usuario registrado correctamente',
+            message: 'Estado 200',
             user: {
                 id: user._id,
                 cedula: user.cedula,
@@ -65,22 +89,29 @@ const register = async (req, res) => {
                 email: user.email,
                 profileImage: user.profileImage,
                 isVerified: user.isVerified,
-                status: user.status
+                status: user.status,
+                authProvider: user.authProvider
             }
         });
     } catch (error) {
         if (error?.code === 11000) {
             if (error.keyPattern?.email) {
-                return res.status(409).json({ message: 'Email already in use' });
+                return res.status(409).json({
+                    message: 'Error 409'
+                });
             }
 
             if (error.keyPattern?.cedula) {
-                return res.status(409).json({ message: 'Cedula already registered' });
+                return res.status(409).json({
+                    message: 'Error 409'
+                });
             }
         }
 
-        console.error(error);
-        return res.status(500).json({ message: 'Error registering user' });
+        console.error('Error al registrar usuario:', error);
+        return res.status(500).json({
+            message: 'Error 500'
+        });
     }
 };
 

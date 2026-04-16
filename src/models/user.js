@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 
-// Define el esquema del usuario
 const userSchema = new mongoose.Schema({
     cedula: {
-        type: String, 
+        type: String,
         required: true,
         unique: true,
         trim: true
@@ -20,7 +19,9 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true,
+        required: function () {
+            return this.authProvider === 'local';
+        },
         trim: true
     },
     email: {
@@ -32,23 +33,25 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
-        select: false, //Para no devolver consultas
+        required: function () {
+            return this.authProvider === 'local';
+        },
+        select: false
     },
     profileImage: {
         type: String,
         default: null
     },
-    isVerified:{
+    isVerified: {
         type: Boolean,
-        default: null
+        default: false
     },
     status: {
         type: String,
         enum: ['pending', 'active'],
         default: 'pending'
     },
-    googleI: {
+    googleId: {
         type: String,
         default: null
     },
@@ -56,6 +59,30 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['local', 'google'],
         default: 'local'
+    },
+
+    //Guarda el codigo SMS 
+    twoFactorCode: {
+        type: String,
+        default: null
+    },
+
+    //Guarda hasta cuándo sirve ese código.
+    twoFactorExpires: {
+        type: Date,
+        default: null
+    },
+
+    //Verifica si pasó la verificación 2FA en ese intento.
+    twoFactorVerified: {
+        type: Boolean,
+        default: false
+    },
+
+    //Contador de  intentos fallidos
+    twoFactorAttempts: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true
