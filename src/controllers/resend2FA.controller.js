@@ -41,6 +41,7 @@ const reenviarCodigo2FA = async (req, res) => {
         user.twoFactorCode = codigo;
         user.twoFactorExpires = expiracion;
         user.twoFactorVerified = false;
+        user.twoFactorAttempts = 0;
 
         await user.save();
 
@@ -48,7 +49,9 @@ const reenviarCodigo2FA = async (req, res) => {
 
         return res.status(200).json({
             message: 'Estado 200',
-            expiraEn: expiracion
+            requires2FA: true,
+            userId: user._id,
+            expiresAt: expiracion
         });
 
     } catch (error) {

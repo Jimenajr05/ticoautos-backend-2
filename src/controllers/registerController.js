@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { getPadronDataByCedula } = require('../services/padronService');
+const { enviarCorreoVerificacion } = require('../services/sendEmailService');
 
 const register = async (req, res) => {
     const { cedula, phone, email, password } = req.body;
@@ -21,7 +23,6 @@ const register = async (req, res) => {
         });
     }
 
-    // Si el usuario escribe solo 8 dígitos, se le agrega +506 automáticamente
     if (/^\d{8}$/.test(normalizedPhone)) {
         normalizedPhone = `+506${normalizedPhone}`;
     }
@@ -42,7 +43,7 @@ const register = async (req, res) => {
         const existingUserByEmail = await User.findOne({ email: normalizedEmail });
         if (existingUserByEmail) {
             return res.status(409).json({
-                message: 'Estado 409'
+                message: 'Error 409'
             });
         }
 
@@ -57,13 +58,16 @@ const register = async (req, res) => {
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(400).json({
-                message: 'Error 400'
+                message: 'Debe ser mayor de edad para registrarse (cédula no encontrada en padrón)'
             });
         }
 
         const fullLastName = `${padronData.apellidoPaterno} ${padronData.apellidoMaterno}`.trim();
         const hashedPassword = await bcrypt.hash(password, 10);
         const profileImage = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null;
+
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
         const user = await User.create({
             cedula: normalizedCedula,
@@ -75,11 +79,15 @@ const register = async (req, res) => {
             profileImage,
             isVerified: false,
             status: 'pending',
-            authProvider: 'local'
+            authProvider: 'local',
+            verificationToken,
+            verificationTokenExpires
         });
 
+        await enviarCorreoVerificacion(user.email, user.name, verificationToken);
+
         return res.status(201).json({
-            message: 'Estado 200',
+            message: 'Registro exitoso. Revisa tu correo para activar la cuenta.',
             user: {
                 id: user._id,
                 cedula: user.cedula,
@@ -94,6 +102,10 @@ const register = async (req, res) => {
             }
         });
     } catch (error) {
+        if (error?.response?.body?.errors) {
+            console.error('ERROR SENDGRID:', error.response.body.errors);
+        }
+
         if (error?.code === 11000) {
             if (error.keyPattern?.email) {
                 return res.status(409).json({
@@ -109,6 +121,7 @@ const register = async (req, res) => {
         }
 
         console.error('Error al registrar usuario:', error);
+
         return res.status(500).json({
             message: 'Error 500'
         });

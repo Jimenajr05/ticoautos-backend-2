@@ -102,7 +102,7 @@ const googleLoginOrRegister = async (req, res) => {
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(400).json({
-                message: 'Error 400'
+                message: 'Debe ser mayor de edad para continuar (cédula no encontrada en padrón)'
             });
         }
 

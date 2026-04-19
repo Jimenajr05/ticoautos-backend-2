@@ -61,25 +61,31 @@ const userSchema = new mongoose.Schema({
         default: 'local'
     },
 
-    //Guarda el codigo SMS 
+    verificationToken: {
+        type: String,
+        default: null
+    },
+
+    verificationTokenExpires: {
+        type: Date,
+        default: null
+    },
+
     twoFactorCode: {
         type: String,
         default: null
     },
 
-    //Guarda hasta cuándo sirve ese código.
     twoFactorExpires: {
         type: Date,
         default: null
     },
 
-    //Verifica si pasó la verificación 2FA en ese intento.
     twoFactorVerified: {
         type: Boolean,
         default: false
     },
 
-    //Contador de  intentos fallidos
     twoFactorAttempts: {
         type: Number,
         default: 0
