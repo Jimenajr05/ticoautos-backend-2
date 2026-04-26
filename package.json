@@ -19,6 +19,7 @@
   "homepage": "https://github.com/jimenajr05/ticoautos-backend#readme",
   "description": "",
   "dependencies": {
+    "@apollo/server": "^5.5.0",
     "@sendgrid/mail": "^8.1.6",
     "axios": "^1.13.6",
     "bcrypt": "^6.0.0",
@@ -27,6 +28,7 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "google-auth-library": "^10.6.2",
+    "graphql": "^16.13.2",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.3",
