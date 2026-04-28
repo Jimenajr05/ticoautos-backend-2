@@ -1,3 +1,5 @@
+import chatAIRoutes from "./routes/chatAIRoutes.js";
+
 // Importa express para crear la aplicación del servidor
 const express = require('express');
 
@@ -105,6 +107,11 @@ server.start().then(() => {
     console.log('Servidor GraphQL corriendo en http://localhost:5000/graphql');
   });
 });
+
+//Ruta IA
+app.use("/api/chat-ai", chatAIRoutes);
+
+
 
 // Exporta la aplicación para usarla en server.js
 module.exports = app;
