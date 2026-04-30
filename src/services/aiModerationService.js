@@ -1,6 +1,6 @@
-import axios from "axios";
+const axios = require("axios");
 
-export const validarMensajeConAI = async (mensaje) => {
+const validarMensajeConAI = async (mensaje) => {
   try {
     const prompt = `
 Eres un sistema de moderación para una plataforma de compra y venta de vehículos.
@@ -38,12 +38,7 @@ Mensaje a evaluar:
       "https://openrouter.ai/api/v1/chat/completions",
       {
         model: process.env.OPENROUTER_MODEL,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
+        messages: [{ role: "user", content: prompt }],
         temperature: 0,
       },
       {
@@ -57,10 +52,7 @@ Mensaje a evaluar:
     );
 
     const contenido = response.data.choices[0].message.content;
-
-    const resultado = JSON.parse(contenido);
-
-    return resultado;
+    return JSON.parse(contenido);
   } catch (error) {
     console.error("Error validando mensaje con AI:", error.message);
 
@@ -71,3 +63,4 @@ Mensaje a evaluar:
   }
 };
 
+module.exports = { validarMensajeConAI };

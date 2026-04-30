@@ -1,8 +1,10 @@
-import express from "express";
-import { validarMensajeChat } from "../controllers/chatAIController.js";
+const express = require("express");
+const { validarMensajeChat } = require("../controllers/chatAIController");
 
 const router = express.Router();
 
 router.post("/validar-mensaje", validarMensajeChat);
 
-export default router;
+module.exports = router;
+
+

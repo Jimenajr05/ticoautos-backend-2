@@ -1,36 +1,27 @@
+const { validarMensajeConAI } = require("../services/aiModerationService");
 
-import { validarMensajeConAI } from "../services/aiModerationService.js";
-
-export const validarMensajeChat = async (req, res) => {
+const validarMensajeChat = async (req, res) => {
   try {
     const { mensaje } = req.body;
 
-    if (!mensaje || mensaje.trim() === "") {
+    if (!mensaje) {
       return res.status(400).json({
         permitido: false,
-        mensaje: "Error 400",
+        razon: "El mensaje es requerido",
       });
     }
 
     const resultado = await validarMensajeConAI(mensaje);
 
-    if (!resultado.permitido) {
-      return res.status(403).json({
-        permitido: false,
-        mensaje: resultado.razon,
-      });
-    }
-
-    return res.json({
-      permitido: true,
-      mensaje: "Mensaje permitido.",
-    });
+    return res.json(resultado);
   } catch (error) {
-    console.error("Error en validación de chat:", error);
+    console.error("Error en chatAIController:", error.message);
 
     return res.status(500).json({
       permitido: false,
-      mensaje: "Error 500.",
+      razon: "Error 500",
     });
   }
 };
+
+module.exports = { validarMensajeChat };
