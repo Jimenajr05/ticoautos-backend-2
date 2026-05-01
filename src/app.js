@@ -37,5 +37,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/chat-ai", chatAIRoutes);
 
+
+
+
 // Exporta la aplicación para usarla en server.js
 module.exports = app;

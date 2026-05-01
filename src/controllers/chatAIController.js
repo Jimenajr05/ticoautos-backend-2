@@ -7,7 +7,7 @@ const validarMensajeChat = async (req, res) => {
     if (!mensaje) {
       return res.status(400).json({
         permitido: false,
-        razon: "El mensaje es requerido",
+        razon: "Status 400",
       });
     }
 
