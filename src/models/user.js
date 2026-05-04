@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema({
         required: function () {
             return this.authProvider === 'local';
         },
+        unique: true,
+        sparse: true,
         trim: true
     },
     email: {
