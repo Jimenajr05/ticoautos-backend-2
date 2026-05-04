@@ -8,9 +8,7 @@ const register = async (req, res) => {
     const { cedula, phone, email, password } = req.body;
 
     if (!cedula || !phone || !email || !password) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     const normalizedCedula = cedula.trim();
@@ -18,9 +16,7 @@ const register = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     if (!/^\d{9}$/.test(normalizedCedula)) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     if (/^\d{8}$/.test(normalizedPhone)) {
@@ -28,30 +24,27 @@ const register = async (req, res) => {
     }
 
     if (!/^\+\d{8,15}$/.test(normalizedPhone)) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     if (password.length < 6) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     try {
         const existingUserByEmail = await User.findOne({ email: normalizedEmail });
         if (existingUserByEmail) {
-            return res.status(409).json({
-                message: 'Error 409'
-            });
+            return res.status(409).json({ message: 'Este correo electrónico ya se encuentra registrado.' });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
-            return res.status(409).json({
-                message: 'Error 409'
-            });
+            return res.status(409).json({ message: 'Esta cédula ya se encuentra registrada en otra cuenta.' });
+        }
+
+        const existingUserByPhone = await User.findOne({ phone: normalizedPhone });
+        if (existingUserByPhone) {
+            return res.status(409).json({ message: 'Este número de teléfono ya está registrado en otra cuenta.' });
         }
 
         const padronData = await getPadronDataByCedula(normalizedCedula);
@@ -108,23 +101,20 @@ const register = async (req, res) => {
 
         if (error?.code === 11000) {
             if (error.keyPattern?.email) {
-                return res.status(409).json({
-                    message: 'Error 409'
-                });
+                return res.status(409).json({ message: 'Este correo electrónico ya se encuentra registrado.' });
             }
 
             if (error.keyPattern?.cedula) {
-                return res.status(409).json({
-                    message: 'Error 409'
-                });
+                return res.status(409).json({ message: 'Esta cédula ya se encuentra registrada en otra cuenta.' });
+            }
+            if (error.keyPattern?.phone) {
+                return res.status(409).json({ message: 'Este número de teléfono ya está registrado en otra cuenta.' });
             }
         }
 
         console.error('Error al registrar usuario:', error);
 
-        return res.status(500).json({
-            message: 'Error 500'
-        });
+        return res.status(500).json({});
     }
 };
 
