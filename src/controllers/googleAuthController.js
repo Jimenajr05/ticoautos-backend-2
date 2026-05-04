@@ -86,16 +86,27 @@ const googleLoginOrRegister = async (req, res) => {
         const normalizedCedula = cedula.trim();
 
         if (!/^\d{9}$/.test(normalizedCedula)) {
-            return res.status(400).json({
-                message: 'Error 400'
-            });
+            return res.status(400).json({ message: "El formato de la cédula no es válido." });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
-            return res.status(409).json({
-                message: 'Error 409'
-            });
+            return res.status(409).json({ message: "Esta cédula ya se encuentra registrada en otra cuenta." });
+        }
+
+        let normalizedPhone = phone.trim();
+
+        if (/^\d{8}$/.test(normalizedPhone)) {
+            normalizedPhone = `+506${normalizedPhone}`;
+        }
+
+        if (!/^\+\d{8,15}$/.test(normalizedPhone)) {
+            return res.status(400).json({ message: "El formato del número de teléfono no es válido." });
+        }
+
+        const existingUserByPhone = await User.findOne({ phone: normalizedPhone });
+        if (existingUserByPhone) {
+            return res.status(409).json({ message: "Este número de teléfono ya está registrado en otra cuenta." });
         }
 
         const padronData = await getPadronDataByCedula(normalizedCedula);
@@ -114,7 +125,7 @@ const googleLoginOrRegister = async (req, res) => {
             cedula: normalizedCedula,
             name: padronData.nombre.trim(),
             lastName: fullLastName,
-            phone: phone.trim(),
+            phone: normalizedPhone,
             email,
             password: 'GOOGLE_AUTH_NO_PASSWORD',
             profileImage: picture,
@@ -143,9 +154,7 @@ const googleLoginOrRegister = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({
-            message: 'Error 500'
-        });
+        return res.status(500).json({});
     }
 };
 
