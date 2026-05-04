@@ -13,7 +13,10 @@ const validarMensajeChat = async (req, res) => {
 
     const resultado = await validarMensajeConAI(mensaje);
 
-    return res.json(resultado);
+    return res.json({
+      permitido: resultado.permitido,
+      razon: resultado.razon || resultado.mensaje || "Status 400",
+    });
   } catch (error) {
     console.error("Error en chatAIController:", error.message);
 

@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-
 const validarMensajeConAI = async (mensaje) => {
   try {
     const prompt = `
@@ -80,6 +79,11 @@ Mensaje a evaluar:
     return JSON.parse(contenido);
   } catch (error) {
     console.error("Error validando mensaje con AI:", error.message);
+
+    if (error.response) {
+      console.error("Status OpenRouter:", error.response.status);
+      console.error("Data OpenRouter:", error.response.data);
+    }
 
     return {
       permitido: false,
