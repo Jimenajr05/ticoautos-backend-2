@@ -1,5 +1,7 @@
 const { validarMensajeConAI } = require("../services/aiModerationService");
 
+//Validar mensajes de chat utilizando IA.
+
 const validarMensajeChat = async (req, res) => {
   try {
     const { mensaje } = req.body;
@@ -11,8 +13,10 @@ const validarMensajeChat = async (req, res) => {
       });
     }
 
+    // Consulta al servicio de moderación de IA
     const resultado = await validarMensajeConAI(mensaje);
 
+    // Retorna la respuesta de la IA al cliente
     return res.json({
       permitido: resultado.permitido,
       razon: resultado.razon || resultado.mensaje || "Status 400",

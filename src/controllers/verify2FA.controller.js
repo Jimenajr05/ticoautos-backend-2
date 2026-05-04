@@ -1,18 +1,23 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
+/**
+ * Verificar el código de autenticación (2FA).
+ * Valida que el código sea correcto y no haya expirado. Si es válido, genera un token JWT para el usuario.
+ * Permite un máximo de 3 intentos antes de invalidar el código actual.
+**/
 const verificarCodigo2FA = async (req, res) => {
     const { usuarioId, codigo } = req.body;
 
     if (!usuarioId || !codigo) {
         return res.status(400).json({
-            message: 'El usuarioId y el código son obligatorios'
+            message: 'Error 400'
         });
     }
 
     if (!/^\d{6}$/.test(codigo)) {
         return res.status(400).json({
-            message: 'El código debe tener 6 dígitos'
+            message: 'Error 400'
         });
     }
 
@@ -21,13 +26,13 @@ const verificarCodigo2FA = async (req, res) => {
 
         if (!usuario) {
             return res.status(404).json({
-                message: 'Usuario no encontrado'
+                message: 'Error 404'
             });
         }
 
         if (!usuario.twoFactorCode || !usuario.twoFactorExpires) {
             return res.status(400).json({
-                message: 'No hay un código 2FA pendiente de verificación'
+                message: 'Estado 400'
             });
         }
 
@@ -38,7 +43,7 @@ const verificarCodigo2FA = async (req, res) => {
             await usuario.save();
 
             return res.status(400).json({
-                message: 'El código ha expirado'
+                message: 'Estado 400'
             });
         }
 
@@ -52,7 +57,7 @@ const verificarCodigo2FA = async (req, res) => {
                 await usuario.save();
 
                 return res.status(400).json({
-                    message: 'Has superado el número de intentos. Solicita un nuevo código.'
+                    message: 'Estado 400'
                 });
             }
 

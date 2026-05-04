@@ -4,6 +4,11 @@ const crypto = require('crypto');
 const { getPadronDataByCedula } = require('../services/padronService');
 const { enviarCorreoVerificacion } = require('../services/sendEmailService');
 
+/**
+ * Registrar un nuevo usuario en el sistema
+ * Valida los datos ingresados, consulta el padrón para confirmar identidad
+ * Cifra la contraseña y envía un correo de verificación.
+ */
 const register = async (req, res) => {
     const { cedula, phone, email, password } = req.body;
 
@@ -34,24 +39,24 @@ const register = async (req, res) => {
     try {
         const existingUserByEmail = await User.findOne({ email: normalizedEmail });
         if (existingUserByEmail) {
-            return res.status(409).json({ message: 'Este correo electrónico ya se encuentra registrado.' });
+            return res.status(409).json({ message: 'Estado 409' });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
-            return res.status(409).json({ message: 'Esta cédula ya se encuentra registrada en otra cuenta.' });
+            return res.status(409).json({ message: 'Estado 409' });
         }
 
         const existingUserByPhone = await User.findOne({ phone: normalizedPhone });
         if (existingUserByPhone) {
-            return res.status(409).json({ message: 'Este número de teléfono ya está registrado en otra cuenta.' });
+            return res.status(409).json({ message: 'Estado 409' });
         }
 
         const padronData = await getPadronDataByCedula(normalizedCedula);
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(400).json({
-                message: 'Debe ser mayor de edad para registrarse (cédula no encontrada en padrón)'
+                message: 'Estado 400'
             });
         }
 
@@ -80,7 +85,7 @@ const register = async (req, res) => {
         await enviarCorreoVerificacion(user.email, user.name, verificationToken);
 
         return res.status(201).json({
-            message: 'Registro exitoso. Revisa tu correo para activar la cuenta.',
+            message: 'Estado 201',
             user: {
                 id: user._id,
                 cedula: user.cedula,
@@ -101,14 +106,14 @@ const register = async (req, res) => {
 
         if (error?.code === 11000) {
             if (error.keyPattern?.email) {
-                return res.status(409).json({ message: 'Este correo electrónico ya se encuentra registrado.' });
+                return res.status(409).json({ message: 'Estado 409' });
             }
 
             if (error.keyPattern?.cedula) {
-                return res.status(409).json({ message: 'Esta cédula ya se encuentra registrada en otra cuenta.' });
+                return res.status(409).json({ message: 'Estado 409' });
             }
             if (error.keyPattern?.phone) {
-                return res.status(409).json({ message: 'Este número de teléfono ya está registrado en otra cuenta.' });
+                return res.status(409).json({ message: 'Estado 409' });
             }
         }
 

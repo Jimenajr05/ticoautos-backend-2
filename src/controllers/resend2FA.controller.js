@@ -1,10 +1,14 @@
 const User = require('../models/user');
 const { enviarCodigoSMS } = require('../services/sendSmsService');
 
+//Genera un código aleatorio de 6 dígitos (2FA).
+
 const generarCodigo2FA = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+//Reenviar el código de autenticación (2FA) por SMS.
+//Valida el usuario, genera un nuevo código, actualiza la base de datos y envía el SMS.
 const reenviarCodigo2FA = async (req, res) => {
     const { userId } = req.body;
 
@@ -47,7 +51,7 @@ const reenviarCodigo2FA = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error al reenviar código 2FA:', error);
+        console.error('Error 500', error);
         return res.status(500).json({});
     }
 };

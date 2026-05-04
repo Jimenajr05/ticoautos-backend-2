@@ -1,5 +1,10 @@
 const axios = require("axios");
 
+/**
+ * Utiliza IA (OpenRouter) para moderar los mensajes del chat.
+ * Evalúa si el usuario está intentando compartir información personal de contacto
+ * O sacar la negociación fuera de la plataforma (TicoAutos).
+ */
 const validarMensajeConAI = async (mensaje) => {
   try {
     const prompt = `

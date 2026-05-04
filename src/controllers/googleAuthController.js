@@ -5,19 +5,24 @@ const { getPadronDataByCedula } = require('../services/padronService');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+/**
+ * Manejar el inicio de sesión o registro utilizando Google OAuth2
+ * Verifica el token de Google, comprueba si el usuario ya existede
+ * Si un nuevo usuario solicita cédula y teléfono para validarlo en el padrón antes de registrarlo.
+*/
 const googleLoginOrRegister = async (req, res) => {
     const { credential, cedula, phone } = req.body;
 
     if (!credential) {
-        return res.status(400).json({ message: 'Google credential is required' });
+        return res.status(400).json({ message: 'Estado 400' });
     }
 
     if (!process.env.JWT_SECRET) {
-        return res.status(500).json({ message: 'JWT_SECRET is not configured' });
+        return res.status(500).json({ message: 'Estado 500' });
     }
 
     if (!process.env.GOOGLE_CLIENT_ID) {
-        return res.status(500).json({ message: 'GOOGLE_CLIENT_ID is not configured' });
+        return res.status(500).json({ message: 'Estado 500' });
     }
 
     try {
@@ -35,17 +40,16 @@ const googleLoginOrRegister = async (req, res) => {
         const picture = payload.picture || null;
 
         if (!email) {
-            return res.status(400).json({ message: 'No se pudo obtener el correo de Google' });
+            return res.status(400).json({ message: 'Estado 400' });
         }
 
-        // Caso 1: ya existe usuario con ese correo
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            // Si ya existe pero no es cuenta Google, bloquear
+            //Si ya existe pero no es cuenta Google, bloquear
             if (existingUser.authProvider !== 'google') {
                 return res.status(409).json({
-                    message: 'Este correo ya está registrado con correo y contraseña'
+                    message: 'Estado 409'
                 });
             }
 
@@ -56,7 +60,7 @@ const googleLoginOrRegister = async (req, res) => {
             );
 
             return res.status(200).json({
-                message: 'Login con Google exitoso',
+                message: 'Estado 200',
                 token,
                 user: {
                     id: existingUser._id,
@@ -70,7 +74,7 @@ const googleLoginOrRegister = async (req, res) => {
             });
         }
 
-        // Caso 2: usuario nuevo de Google, todavía falta cédula y teléfono
+        //Usuario nuevo de Google, todavía falta cédula y teléfono
         if (!cedula || !phone) {
             return res.status(200).json({
                 requiresCedula: true,
@@ -86,12 +90,12 @@ const googleLoginOrRegister = async (req, res) => {
         const normalizedCedula = cedula.trim();
 
         if (!/^\d{9}$/.test(normalizedCedula)) {
-            return res.status(400).json({ message: "El formato de la cédula no es válido." });
+            return res.status(400).json({ message: "Estado 400" });
         }
 
         const existingUserByCedula = await User.findOne({ cedula: normalizedCedula });
         if (existingUserByCedula) {
-            return res.status(409).json({ message: "Esta cédula ya se encuentra registrada en otra cuenta." });
+            return res.status(409).json({ message: "Estado 409" });
         }
 
         let normalizedPhone = phone.trim();
@@ -101,19 +105,19 @@ const googleLoginOrRegister = async (req, res) => {
         }
 
         if (!/^\+\d{8,15}$/.test(normalizedPhone)) {
-            return res.status(400).json({ message: "El formato del número de teléfono no es válido." });
+            return res.status(400).json({ message: "Error 400" });
         }
 
         const existingUserByPhone = await User.findOne({ phone: normalizedPhone });
         if (existingUserByPhone) {
-            return res.status(409).json({ message: "Este número de teléfono ya está registrado en otra cuenta." });
+            return res.status(409).json({ message: "Estado 409" });
         }
 
         const padronData = await getPadronDataByCedula(normalizedCedula);
 
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(400).json({
-                message: 'Debe ser mayor de edad para continuar (cédula no encontrada en padrón)'
+                message: 'Estado 400'
             });
         }
 
@@ -140,7 +144,7 @@ const googleLoginOrRegister = async (req, res) => {
         );
 
         return res.status(201).json({
-            message: 'Usuario registrado con Google correctamente',
+            message: 'Estado 201',
             token,
             user: {
                 id: user._id,
