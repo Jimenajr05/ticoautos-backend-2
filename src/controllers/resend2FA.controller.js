@@ -9,30 +9,22 @@ const reenviarCodigo2FA = async (req, res) => {
     const { userId } = req.body;
 
     if (!userId) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     try {
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({
-                message: 'Error 404'
-            });
+            return res.status(404).json({});
         }
 
         if (!user.phone) {
-            return res.status(400).json({
-                message: 'Error 400'
-            });
+            return res.status(400).json({});
         }
 
         if (user.authProvider === 'google') {
-            return res.status(400).json({
-                message: 'Error 400'
-            });
+            return res.status(400).json({});
         }
 
         const codigo = generarCodigo2FA();
@@ -48,7 +40,7 @@ const reenviarCodigo2FA = async (req, res) => {
         await enviarCodigoSMS(user.phone, codigo);
 
         return res.status(200).json({
-            message: 'Estado 200',
+
             requires2FA: true,
             userId: user._id,
             expiresAt: expiracion
@@ -56,9 +48,7 @@ const reenviarCodigo2FA = async (req, res) => {
 
     } catch (error) {
         console.error('Error al reenviar código 2FA:', error);
-        return res.status(500).json({
-            message: 'Error 500'
-        });
+        return res.status(500).json({});
     }
 };
 

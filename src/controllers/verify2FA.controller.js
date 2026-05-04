@@ -81,7 +81,6 @@ const verificarCodigo2FA = async (req, res) => {
         );
 
         return res.status(200).json({
-            message: 'Estado 200',
             token,
             usuario: {
                 id: usuario._id,
