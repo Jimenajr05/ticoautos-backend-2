@@ -68,7 +68,7 @@ exports.updateVehicle = async (req, res) => {
       });
     }
 
-     // Si se subieron nuevas imágenes, actualiza el campo vehicleImage
+    // Si se subieron nuevas imágenes, actualiza el campo vehicleImage
     if (req.files && req.files.length > 0) {
       req.body.vehicleImage = req.files.map(
         (file) => `/${file.path.replace(/\\/g, "/")}`
@@ -82,7 +82,7 @@ exports.updateVehicle = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "Estado 200",
+
       vehicle: updatedVehicle,
     });
   } catch (error) {
@@ -153,7 +153,7 @@ exports.deleteVehicle = async (req, res) => {
     await Vehicle.findByIdAndDelete(id);
 
     res.status(200).json({
-      message: "Estado 200",
+
     });
   } catch (error) {
     res.status(500).json({
@@ -193,7 +193,7 @@ exports.markAsSold = async (req, res) => {
     await vehicle.save();
 
     res.status(200).json({
-      message: "Estado 200",
+
       vehicle,
     });
   } catch (error) {
@@ -299,7 +299,7 @@ exports.getMyVehicles = async (req, res) => {
 
     // Respuesta exitosa
     res.status(200).json({
-      message: "Estado 200",
+
       data: vehicles,
     });
   } catch (error) {
@@ -333,7 +333,6 @@ exports.getVehicleShareLink = async (req, res) => {
     // Respuesta exitosa
     res.status(200).json({
       success: true,
-      message: "Estado 200",
       data: {
         vehicleId: vehicle._id,
         shareURL,

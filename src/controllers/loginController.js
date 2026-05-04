@@ -12,9 +12,7 @@ const login = async (req, res) => {
 
     // Verifica que ambos campos existan
     if (!email || !password) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     try {
@@ -24,38 +22,28 @@ const login = async (req, res) => {
         const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
         if (!user) {
-            return res.status(401).json({
-                message: 'Error 401'
-            });
+            return res.status(401).json({ message: "La cuenta no existe o las credenciales son incorrectas." });
         }
 
         // Verifica si la cuenta fue creada con Google
         if (user.authProvider === 'google') {
-            return res.status(400).json({
-                message: 'Error 400'
-            });
+            return res.status(400).json({ message: "Esta cuenta fue registrada con Google. Por favor, inicia sesión usando Google." });
         }
 
         // Verifica si la cuenta está activa y verificada
         if (user.status !== 'active' || !user.isVerified) {
-            return res.status(403).json({
-                message: 'Error 403'
-            });
+            return res.status(403).json({ message: "Por favor, revisa tu correo para verificar tu cuenta." });
         }
 
         // Compara la contraseña enviada con la guardada
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            return res.status(401).json({
-                message: 'Error 401'
-            });
+            return res.status(401).json({ message: "La cuenta no existe o las credenciales son incorrectas." });
         }
 
         // Verifica que tenga teléfono registrado
         if (!user.phone) {
-            return res.status(400).json({
-                message: 'Error 400'
-            });
+            return res.status(400).json({ message: "La cuenta no tiene un número telefónico registrado." });
         }
 
         // Genera el código 2FA y su expiración
@@ -75,7 +63,7 @@ const login = async (req, res) => {
 
         // Responde indicando que falta verificar el código
         return res.status(200).json({
-            message: 'Estado 200',
+
             requires2FA: true,
             userId: user._id,
             expiresAt: expiracion
@@ -83,9 +71,7 @@ const login = async (req, res) => {
 
     } catch (error) {
         console.error('Error en login:', error);
-        return res.status(500).json({
-            message: 'Error 500'
-        });
+        return res.status(500).json({});
     }
 };
 

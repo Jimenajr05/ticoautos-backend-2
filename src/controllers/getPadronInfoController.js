@@ -4,9 +4,7 @@ const getPadronInfo = async (req, res) => {
     const { cedula } = req.params;
 
     if (!cedula || !/^\d{9}$/.test(cedula.trim())) {
-        return res.status(400).json({
-            message: 'Error 400'
-        });
+        return res.status(400).json({});
     }
 
     try {
