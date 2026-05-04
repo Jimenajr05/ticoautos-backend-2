@@ -2,6 +2,10 @@ const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
+/**
+ * Envia el correo electrónico de verificación de cuenta al usuario.
+ * Utiliza SendGrid para enviar un correo con un enlace único de validación.
+ */
 const enviarCorreoVerificacion = async (email, nombre, token) => {
     const verificationLink = `${process.env.BACKEND_URL}/api/auth/verificar-correo?token=${token}`;
 

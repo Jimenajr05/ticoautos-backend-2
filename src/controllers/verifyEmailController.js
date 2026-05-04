@@ -1,5 +1,10 @@
 const User = require('../models/user');
 
+/**
+ * Verificar la dirección de correo electrónico del usuario.
+ * Utiliza un token enviado por correo electrónico para confirmar la cuenta del usuario.
+ * Si el token es válido y no ha expirado, activa la cuenta y elimina el token.
+ */
 const verifyEmail = async (req, res) => {
     const { token } = req.query;
 
