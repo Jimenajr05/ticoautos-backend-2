@@ -16,7 +16,6 @@ const getPadronInfo = async (req, res) => {
 
         console.log('PADRON DATA:', padronData);
 
-        // Si no se encuentra la informacion tira 404
         if (!padronData || padronData.message === 'No encontrado') {
             return res.status(404).json({
                 message: cedula

@@ -1,12 +1,11 @@
 const { validarMensajeConAI } = require("../services/aiModerationService");
 
-//Controlador para validar mensajes de chat utilizando IA.
+//Validar mensajes de chat utilizando IA.
 
 const validarMensajeChat = async (req, res) => {
   try {
     const { mensaje } = req.body;
 
-    //Si no hay mensaje, retorna un error 400
     if (!mensaje) {
       return res.status(400).json({
         permitido: false,
