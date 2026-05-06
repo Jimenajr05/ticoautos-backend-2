@@ -158,3 +158,7 @@ El middleware **Multer** permite subir imágenes JPG, PNG y WEBP con un tamaño 
 ## Autoras
 - María Paz Ugalde Araya
 - María Jimena Jara Rojas
+
+# TicoAuto
+
+![Logo TicoAuto](./images/logo.png)
