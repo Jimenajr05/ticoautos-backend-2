@@ -10,10 +10,11 @@ const conectDB = require('./src/config/db');
 // Ejecuta la conexión a la base de datos
 conectDB();
 
-// Define el puerto del servidor (usa el del .env o 3000 por defecto)
+// Define el puerto del servidor usa el del .env o 3000 
 const PORT = process.env.PORT || 3000;
 
 // Inicia el servidor y escucha en el puerto definido
 app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+

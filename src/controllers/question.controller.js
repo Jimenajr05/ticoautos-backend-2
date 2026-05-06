@@ -17,7 +17,7 @@ exports.askQuestion = async (req, res) => {
 
     // Si no existe el vehículo, devuelve error
     if (!vehicle) {
-      return res.status(404).json({ message: "Vehículo no encontrado" });
+      return res.status(404).json({});
     }
 
     // Evita que el dueño pregunte por su propio vehículo
@@ -52,7 +52,7 @@ exports.askQuestion = async (req, res) => {
       data: newQuestion,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error al enviar pregunta", error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -84,7 +84,6 @@ exports.getQuestionsForMyVehicles = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al obtener preguntas de mis vehículos",
       error: error.message,
     });
   }
@@ -101,7 +100,6 @@ exports.answerQuestion = async (req, res) => {
     // Valida que la respuesta no esté vacía
     if (!answer || !answer.trim()) {
       return res.status(400).json({
-        message: "La respuesta es obligatoria",
       });
     }
 
@@ -114,35 +112,30 @@ exports.answerQuestion = async (req, res) => {
     // Si la pregunta no existe
     if (!question) {
       return res.status(404).json({
-        message: "Pregunta no encontrada",
       });
     }
 
     // Si no se encontró el vehículo asociado
     if (!question.vehicle) {
       return res.status(404).json({
-        message: "Vehículo asociado no encontrado",
       });
     }
 
     // Si el vehículo no tiene propietario relacionado
     if (!question.vehicle.user) {
       return res.status(400).json({
-        message: "El vehículo no tiene propietario asociado",
       });
     }
 
     // Solo el dueño del vehículo puede responder la pregunta
     if (question.vehicle.user.toString() !== req.user.id) {
       return res.status(403).json({
-        message: "No autorizado para responder",
       });
     }
 
     // Evita responder una pregunta que ya fue respondida
     if (question.answer) {
       return res.status(400).json({
-        message: "Esta pregunta ya fue respondida",
       });
     }
 
@@ -158,13 +151,11 @@ exports.answerQuestion = async (req, res) => {
   
     // Devuelve respuesta exitosa
     res.status(200).json({
-      message: "Respuesta enviada correctamente",
       data: question,
     });
   } catch (error) {
-    console.error("Error en answerQuestion:", error);
+    console.error("Error 200:", error);
     res.status(500).json({
-      message: "Error al responder la pregunta",
       error: error.message,
     });
   }
@@ -195,7 +186,6 @@ exports.getMyQuestions = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al obtener tus preguntas",
       error: error.message,
     });
   }
@@ -233,7 +223,6 @@ exports.getVehicleQuestions = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al obtener las preguntas del vehículo",
       error: error.message,
     });
   }
@@ -251,7 +240,6 @@ exports.deleteConversation = async (req, res) => {
     // Si el vehículo no existe
     if (!vehicle) {
       return res.status(404).json({
-        message: "Vehículo no encontrado",
       });
     }
 
@@ -264,7 +252,6 @@ exports.deleteConversation = async (req, res) => {
     // Solo el dueño o quien preguntó puede eliminar la conversación
     if (!isOwner && !isAsker) {
       return res.status(403).json({
-        message: "No autorizado para eliminar esta conversación",
       });
     }
 
@@ -280,7 +267,6 @@ exports.deleteConversation = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      message: "Error al eliminar la conversación",
       error: error.message,
     });
   }

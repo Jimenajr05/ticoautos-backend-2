@@ -1,38 +1,36 @@
 # TicoAutos Backend
 
-Backend del sistema **TicoAutos**, una plataforma para la publicación y gestión de vehículos en venta donde los usuarios pueden registrarse, publicar vehículos y comunicarse con otros usuarios mediante preguntas y respuestas.
+Backend del software **TicoAutos** es una plataforma para la publicación y gestión de vehículos en venta donde los usuarios pueden registrarse, publicar vehículos y comunicarse con otros usuarios mediante preguntas y respuestas.
 
 Este backend está desarrollado con **Node.js, Express y MongoDB**, e implementa autenticación mediante **JWT** y subida de imágenes con **Multer**.
 
 ---
 
-# Tecnologías utilizadas
+## Tecnologías utilizadas
 
 * Node.js
 * Express.js
 * MongoDB
 * Mongoose
 * JWT (Json Web Token)
-* Bcrypt
 * Multer
 * CORS
 * Dotenv
 
-# Dependencias instaladas
+## Dependencias instaladas
 
 Durante el desarrollo del backend se instalaron las siguientes dependencias:
 
-- npm install express
-- npm install mongoose
-- npm install dotenv
-- npm install bcrypt
-- npm install jsonwebtoken
-- npm install cors
-- npm install multer
+* `express`
+* `mongoose`
+* `dotenv`
+* `jsonwebtoken`
+* `cors`
+* `multer`
 
 ---
 
-# Estructura del proyecto
+## Estructura del proyecto
 
 ```
 ticoautos-backend
@@ -76,282 +74,87 @@ ticoautos-backend
 
 ---
 
-# Instalación
+## Instalación
 
 1. Clonar el repositorio
-
-```
-git clone https://github.com/Jimenajr05/ticoautos-backend
+```bash
+git clone https://github.com/Jimenajr05/ticoautos-backend.git
 ```
 
 2. Entrar a la carpeta del proyecto
-
-```
+```bash
 cd ticoautos-backend
 ```
 
 3. Instalar dependencias
-
-```
+```bash
 npm install
 ```
 
 4. Crear archivo `.env`
-
-```
+```env
 PORT=3000
-
 DATABASE_URL=mongodb+srv://usuario:password@cluster.mongodb.net/ticoautos_bd?retryWrites=true&w=majority
-
 JWT_SECRET=ticoautos-secret-key
 JWT_EXPIRES_IN=1h
+FRONTEND_URL=http://localhost:5173
 ```
 
 5. Ejecutar el servidor
-
-```
+```bash
 npm start
 ```
 
 ---
 
-# Autenticación
+## Autenticación
 
 El sistema utiliza **JWT (JSON Web Token)** para autenticar usuarios.
-
 Para acceder a rutas protegidas se debe enviar el token en el header:
-
-```
+```http
 Authorization: Bearer TOKEN
 ```
 
----
+### Rutas de Autenticación
 
-# Autenticación de usuarios
-
-### Registrar usuario
-
-POST `/api/auth/register`
-
-Permite registrar un nuevo usuario.
-
-Campos requeridos:
-
-```
-name
-lastName
-age
-phone
-email
-password
-profileImage (opcional)
-```
+* **POST** `/api/auth/register`: Permite registrar un nuevos usuarios
+* **POST** `/api/auth/login`: Permite iniciar sesión y obtener un token JWT.
 
 ---
 
-### Login
+## Vehículos
 
-POST `/api/auth/login`
-
-Permite iniciar sesión y obtener un **token JWT**.
-
-Respuesta:
-
-```
-{
-  token,
-  user
-}
-```
+* **GET** `/api/vehicles`: Obtiene vehículos con filtros (brand, model, minYear, maxYear, minPrice, maxPrice, status, page, limit).
+* **GET** `/api/vehicles/:id`: Devuelve la información completa de un vehículo.
+* **POST** `/api/vehicles`: Crea un vehículo (requiere autenticación y permite hasta 5 imágenes).
+* **PUT** `/api/vehicles/:id`: Actualiza un vehículo (solo propietario).
+* **DELETE** `/api/vehicles/:id`: Elimina un vehículo (solo propietario).
+* **PATCH** `/api/vehicles/:id/sold`: Cambia el estado del vehículo a "sold".
+* **GET** `/api/vehicles/my-vehicles`: Lista vehículos publicados por el usuario autenticado.
+* **GET** `/api/vehicles/:id/share`: Genera enlace para compartir.
 
 ---
 
-# Vehículos
+## Sistema de preguntas
 
-### Obtener vehículos
+El sistema permite a los usuarios hacer preguntas sobre vehículos publicados. Un usuario **no puede preguntarse a sí mismo**.
 
-GET `/api/vehicles`
-
-Permite filtrar vehículos por:
-
-```
-brand
-model
-minYear
-maxYear
-minPrice
-maxPrice
-status
-page
-limit
-```
+* **POST** `/api/questions`: Crea una pregunta.
+* **GET** `/api/questions/my-questions`: Obtiene preguntas hechas por el usuario.
+* **GET** `/api/questions/my-vehicle-questions`: Preguntas de otros en mis vehículos.
+* **GET** `/api/questions/vehicle/:vehicleId`: Preguntas de un vehículo específico.
+* **PUT** `/api/questions/:id/answer`: Responder a una pregunta (solo propietario).
+* **DELETE** `/api/questions/conversation/:vehicleId/:askedById`: Eliminar conversación (propietario o cliente).
 
 ---
 
-### Obtener vehículo por ID
+## Manejo de imágenes
 
-GET `/api/vehicles/:id`
-
-Devuelve la información completa de un vehículo.
-
----
-
-### Crear vehículo
-
-POST `/api/vehicles`
-
-Requiere autenticación.
-
-Permite subir **hasta 5 imágenes**.
+Las imágenes se almacenan en `uploads/users` y `uploads/vehicles`.
+El middleware **Multer** permite subir imágenes JPG, PNG y WEBP con un tamaño máximo de **5MB**.
 
 ---
 
-### Actualizar vehículo
-
-PUT `/api/vehicles/:id`
-
-Solo el propietario puede editar el vehículo.
-
----
-
-### Eliminar vehículo
-
-DELETE `/api/vehicles/:id`
-
-Solo el propietario puede eliminarlo.
-
----
-
-### Marcar vehículo como vendido
-
-PATCH `/api/vehicles/:id/sold`
-
-Cambia el estado del vehículo a **sold**.
-
----
-
-### Obtener vehículos del usuario
-
-GET `/api/vehicles/my-vehicles`
-
-Lista todos los vehículos publicados por el usuario autenticado.
-
----
-
-### Generar enlace para compartir
-
-GET `/api/vehicles/:id/share`
-
-Genera un enlace público para compartir el vehículo.
-
----
-
-# Sistema de preguntas
-
-El sistema permite a los usuarios **hacer preguntas sobre vehículos publicados**.
-
----
-
-### Crear pregunta
-
-POST `/api/questions`
-
-Solo usuarios autenticados.
-
-Un usuario **no puede preguntarse a sí mismo** sobre su vehículo.
-
----
-
-### Obtener preguntas hechas por el usuario
-
-GET `/api/questions/my-questions`
-
----
-
-### Obtener preguntas de mis vehículos
-
-GET `/api/questions/my-vehicle-questions`
-
-Permite ver preguntas hechas por otros usuarios sobre mis vehículos.
-
----
-
-### Obtener preguntas de un vehículo
-
-GET `/api/questions/vehicle/:vehicleId`
-
----
-
-### Responder pregunta
-
-PUT `/api/questions/:id/answer`
-
-Solo el propietario del vehículo puede responder.
-
----
-
-### Eliminar conversación
-
-DELETE `/api/questions/conversation/:vehicleId/:askedById`
-
-Puede eliminarla:
-
-* El propietario del vehículo
-* El usuario que hizo la pregunta
-
----
-
-# Manejo de imágenes
-
-Las imágenes se almacenan en:
-
-```
-uploads/users
-uploads/vehicles
-```
-
-El middleware **Multer** permite:
-
-* Subir imágenes JPG
-* PNG
-* WEBP
-
-Tamaño máximo:
-
-```
-5MB
-```
-
----
-
-# Variables de entorno
-
-El archivo `.env` debe contener:
-
-```
-DATABASE_URL=URL_DE_MONGODB
-JWT_SECRET=CLAVE_SECRETA
-FRONTEND_URL=URL_DEL_FRONTEND
-PORT=3000
-```
-
----
-
-# Funcionalidades principales
-
-- Registro e inicio de sesión
-- Autenticación con JWT
-- Publicación de vehículos
-- Subida de imágenes
-- Filtros de búsqueda
-- Sistema de preguntas y respuestas
-- Eliminación de conversaciones
-- Enlace compartible de vehículos
-- Control de permisos por usuario
-
----
-
-# Autoras
-
+## Autoras
 - María Paz Ugalde Araya
 - María Jimena Jara Rojas

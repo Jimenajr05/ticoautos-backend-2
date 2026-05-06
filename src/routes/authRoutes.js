@@ -1,23 +1,22 @@
-// Importa express para crear rutas
 const express = require('express');
-
-// Importa el controlador de registro de usuarios
-const register = require('../controllers/registerController');
-
-// Importa el controlador de login
-const login= require('../controllers/loginController');
-
-// Importa el middleware de multer para subir archivos
 const upload = require('../middlewares/uploadMiddleware');
 
-// Crea una instancia del router de Express
+const register = require('../controllers/registerController');
+const login = require('../controllers/loginController');
+const getPadronInfo = require('../controllers/getPadronInfoController');
+const { googleLoginOrRegister } = require('../controllers/googleAuthController');
+const { verificarCodigo2FA } = require('../controllers/verify2FA.controller');
+const { reenviarCodigo2FA } = require('../controllers/resend2FA.controller');
+const verifyEmail = require('../controllers/verifyEmailController');
+
 const router = express.Router();
 
-// Ruta para registrar un usuario
-router.post('/register',upload.single('profileImage'), register);
-
-// Ruta para iniciar sesión
+router.post('/register', upload.single('profileImage'), register);
 router.post('/login', login);
+router.post('/verificar-2fa', verificarCodigo2FA);
+router.post('/reenviar-2fa', reenviarCodigo2FA);
+router.get('/padron/:cedula', getPadronInfo);
+router.post('/google', googleLoginOrRegister);
+router.get('/verificar-correo', verifyEmail);
 
-// Exporta las rutas para usarlas en el servidor principal
 module.exports = router;
